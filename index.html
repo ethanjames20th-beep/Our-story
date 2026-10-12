@@ -500,6 +500,7 @@
       if (direction === 1 && current === chapters.length - 1) {
         current = 0;
         experience.classList.remove("visible");
+        opening.style.display = "grid"; 
         opening.classList.remove("fade-out");
         window.scrollTo(0, 0);
         started = false;
