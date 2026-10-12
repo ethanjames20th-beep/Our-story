@@ -1,0 +1,544 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080808">
+  <title>Our Story</title>
+
+  <style>
+    :root {
+      --bg: #080808;
+      --white: #f2efe9;
+      --muted: #92908a;
+      --gold: #c9b795;
+      --line: rgba(255,255,255,.17);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { background: var(--bg); scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--white);
+      font-family: Georgia, "Times New Roman", serif;
+      min-height: 100vh;
+    }
+
+    button { font: inherit; cursor: pointer; }
+
+    button:focus-visible {
+      outline: 1px solid var(--gold);
+      outline-offset: 6px;
+    }
+
+    /* Opening screen */
+    #opening {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      transition: opacity 1.5s ease, visibility 1.5s ease;
+    }
+
+    #opening.fade-out {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    #begin {
+      color: var(--white);
+      background: transparent;
+      border: 1px solid #66615a;
+      padding: 16px 32px;
+      font: 11px Arial, sans-serif;
+      letter-spacing: .35em;
+      transition: background .3s, color .3s;
+    }
+
+    #begin:hover {
+      background: var(--white);
+      color: var(--bg);
+    }
+
+    /* Main story */
+    #experience {
+      display: none;
+      min-height: 100vh;
+      padding: 28px clamp(20px, 6vw, 90px);
+    }
+
+    #experience.visible {
+      display: flex;
+      flex-direction: column;
+      animation: reveal 1.6s ease both;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 18px;
+      color: var(--muted);
+      font: 10px Arial, sans-serif;
+      letter-spacing: .2em;
+    }
+
+    .chapter {
+      width: 100%;
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: clamp(55px, 10vh, 105px) 0 55px;
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      font: 10px Arial, sans-serif;
+      letter-spacing: .3em;
+      margin-bottom: 25px;
+    }
+
+    h1 {
+      max-width: 1000px;
+      margin: 0 0 25px;
+      font-weight: 400;
+      font-size: clamp(45px, 8vw, 108px);
+      line-height: .98;
+      letter-spacing: -.05em;
+    }
+
+    .intro-text {
+      max-width: 650px;
+      color: #bcb9b2;
+      font-size: clamp(17px, 2vw, 21px);
+      line-height: 1.8;
+      white-space: pre-line;
+    }
+
+    /* Horizontal memories */
+    .memories {
+      display: flex;
+      align-items: flex-start;
+      gap: clamp(18px, 3vw, 42px);
+      overflow-x: auto;
+      padding: 30px 0 25px;
+      margin-top: 30px;
+      scroll-snap-type: x proximity;
+      scrollbar-color: #575148 #141414;
+      scrollbar-width: thin;
+    }
+
+    .memory {
+      flex: 0 0 clamp(230px, 29vw, 370px);
+      scroll-snap-align: start;
+    }
+
+    .memory:nth-child(even) { margin-top: 55px; }
+
+    .frame {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      position: relative;
+      overflow: hidden;
+      background: #111;
+      border: 1px solid rgba(255,255,255,.1);
+    }
+
+    .frame img, .frame video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .placeholder {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 25px;
+      color: #77736c;
+      font: 10px/2 Arial, sans-serif;
+      letter-spacing: .2em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .caption {
+      color: #aaa69e;
+      font-size: 14px;
+      line-height: 1.7;
+      margin-top: 15px;
+    }
+
+    .memory-note {
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+      color: #d0cbc2;
+      font-size: 20px;
+      line-height: 1.8;
+      white-space: pre-line;
+    }
+
+    .closing-note {
+      max-width: 750px;
+      margin-top: 40px;
+      color: var(--gold);
+      font-size: clamp(19px, 2.4vw, 27px);
+      line-height: 1.8;
+      font-style: italic;
+      white-space: pre-line;
+    }
+
+    /* Navigation */
+    .navigation {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      border-top: 1px solid var(--line);
+      padding: 20px 0;
+      margin-top: auto;
+    }
+
+    .nav-button {
+      padding: 12px 0;
+      background: none;
+      border: none;
+      color: var(--white);
+      font: 10px Arial, sans-serif;
+      letter-spacing: .2em;
+    }
+
+    .nav-button:disabled {
+      opacity: .25;
+      cursor: default;
+    }
+
+    #next {
+      border-bottom: 1px solid var(--gold);
+    }
+
+    .hint {
+      color: #77736c;
+      font: 9px Arial, sans-serif;
+      letter-spacing: .2em;
+      text-align: center;
+    }
+
+    #blackout {
+      position: fixed;
+      inset: 0;
+      z-index: 8;
+      background: var(--bg);
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    #blackout.flash { animation: flash .8s ease; }
+
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes flash {
+      0% { opacity: 0; }
+      35% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    @media (max-width: 600px) {
+      #experience { padding: 20px; }
+      .memory { flex-basis: 76vw; }
+      .memory:nth-child(even) { margin-top: 25px; }
+      .hint { display: none; }
+      .chapter { padding-top: 65px; }
+      .header { font-size: 9px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- THE EMPTY OPENING SCREEN -->
+  <section id="opening">
+    <button id="begin">BEGIN</button>
+  </section>
+
+  <!-- THE STORY -->
+  <main id="experience">
+
+    <header class="header">
+      <span id="counter">01 / 04</span>
+      <span>A STORY IN MEMORIES</span>
+    </header>
+
+    <section class="chapter">
+      <p class="eyebrow" id="eyebrow"></p>
+      <h1 id="title"></h1>
+      <p class="intro-text" id="intro-text"></p>
+
+      <div class="memories" id="memories"></div>
+
+      <p class="closing-note" id="closing-note"></p>
+    </section>
+
+    <nav class="navigation">
+      <button class="nav-button" id="back">← BACK</button>
+      <span class="hint">TAKE YOUR TIME</span>
+      <button class="nav-button" id="next">CONTINUE →</button>
+    </nav>
+
+  </main>
+
+  <div id="blackout"></div>
+
+  <script>
+    /*
+      YOUR STORY STARTS HERE.
+
+      Replace the example writing with your own.
+      Add your media later using paths such as:
+      "assets/first-photo.jpg"
+      "assets/our-video.mp4"
+    */
+
+    const chapters = [
+      {
+        eyebrow: "CHAPTER ONE",
+        title: "Where it began.",
+        intro: "Every story has a beginning.\nThis is ours.",
+        memories: [
+          {
+            type: "image",
+            src: "assets/first-photo.jpg",
+            caption: "The beginning of something special."
+          },
+          {
+            type: "text",
+            text: "I didn't know then how much these little moments would come to mean to me."
+          },
+          {
+            type: "image",
+            src: "assets/first-memory.jpg",
+            caption: "One of our earliest memories."
+          }
+        ],
+        ending: "And somehow, this was only the beginning."
+      },
+
+      {
+        eyebrow: "CHAPTER TWO",
+        title: "Getting to know you.",
+        intro: "The conversations, the laughs, and all the little things that made you feel less like a stranger and more like my favourite person.",
+        memories: [
+          {
+            type: "image",
+            src: "assets/our-chat.jpg",
+            caption: "One of those conversations."
+          },
+          {
+            type: "video",
+            src: "assets/early-video.mp4",
+            caption: "A little moment in motion."
+          },
+          {
+            type: "text",
+            text: "Put an inside joke here, or something you remember from those early days."
+          }
+        ],
+        ending: "I kept finding more reasons to look forward to the next time we talked."
+      },
+
+      {
+        eyebrow: "CHAPTER THREE",
+        title: "Us, becoming us.",
+        intro: "The places, ordinary days, unexpected adventures, and little moments that slowly became ours.",
+        memories: [
+          {
+            type: "image",
+            src: "assets/our-place.jpg",
+            caption: "Somewhere we went together."
+          },
+          {
+            type: "image",
+            src: "assets/favourite-day.jpg",
+            caption: "One of my favourite days."
+          },
+          {
+            type: "video",
+            src: "assets/our-video.mp4",
+            caption: "I wish I could relive this day."
+          }
+        ],
+        ending: "The best parts were never just the big moments. They were the little ones with you."
+      },
+
+      {
+        eyebrow: "CHAPTER FOUR",
+        title: "And this is only the start.",
+        intro: "We've already made so many memories. And there are still places to go, things to learn, and ordinary days I can't wait to share with you.",
+        memories: [
+          {
+            type: "image",
+            src: "assets/favourite-photo.jpg",
+            caption: "One to hold onto."
+          },
+          {
+            type: "text",
+            text: "Write a letter here in your own words. Talk about what you appreciate about her, a memory you'll always keep, and what you're looking forward to together."
+          }
+        ],
+        ending: "Thank you for being part of my story.\nI can't wait to see what comes next."
+      }
+    ];
+
+    const opening = document.getElementById("opening");
+    const begin = document.getElementById("begin");
+    const experience = document.getElementById("experience");
+    const blackout = document.getElementById("blackout");
+
+    let current = 0;
+    let started = false;
+
+    function createMemory(memory) {
+      const card = document.createElement("article");
+      card.className = "memory";
+
+      if (memory.type === "text") {
+        const text = document.createElement("p");
+        text.className = "memory-note";
+        text.textContent = memory.text;
+        card.appendChild(text);
+        return card;
+      }
+
+      const frame = document.createElement("div");
+      frame.className = "frame";
+
+      const placeholder = document.createElement("div");
+      placeholder.className = "placeholder";
+      placeholder.textContent = memory.type === "video"
+        ? "Your video will appear here"
+        : "Your photo will appear here";
+
+      frame.appendChild(placeholder);
+
+      const media = document.createElement(
+        memory.type === "video" ? "video" : "img"
+      );
+
+      media.src = memory.src;
+      media.alt = memory.caption || "A memory";
+
+      if (memory.type === "video") {
+        media.controls = true;
+        media.playsInline = true;
+        media.preload = "metadata";
+        media.addEventListener("loadeddata", () => placeholder.remove());
+      } else {
+        media.addEventListener("load", () => placeholder.remove());
+      }
+
+      media.addEventListener("error", () => {
+        media.remove();
+      });
+
+      frame.appendChild(media);
+      card.appendChild(frame);
+
+      if (memory.caption) {
+        const caption = document.createElement("p");
+        caption.className = "caption";
+        caption.textContent = memory.caption;
+        card.appendChild(caption);
+      }
+
+      return card;
+    }
+
+    function renderChapter() {
+      const chapter = chapters[current];
+
+      document.getElementById("counter").textContent =
+        `${String(current + 1).padStart(2, "0")} / ${String(chapters.length).padStart(2, "0")}`;
+
+      document.getElementById("eyebrow").textContent = chapter.eyebrow;
+      document.getElementById("title").textContent = chapter.title;
+      document.getElementById("intro-text").textContent = chapter.intro;
+      document.getElementById("closing-note").textContent = chapter.ending;
+
+      const container = document.getElementById("memories");
+      container.replaceChildren(...chapter.memories.map(createMemory));
+      container.scrollLeft = 0;
+
+      document.getElementById("back").disabled = current === 0;
+
+      document.getElementById("next").textContent =
+        current === chapters.length - 1
+          ? "START AGAIN ↺"
+          : "CONTINUE →";
+    }
+
+    function move(direction) {
+      if (direction === 1 && current === chapters.length - 1) {
+        current = 0;
+        experience.classList.remove("visible");
+        opening.classList.remove("fade-out");
+        window.scrollTo(0, 0);
+        started = false;
+        begin.focus();
+        return;
+      }
+
+      current = Math.max(
+        0,
+        Math.min(chapters.length - 1, current + direction)
+      );
+
+      blackout.classList.remove("flash");
+      void blackout.offsetWidth;
+      blackout.classList.add("flash");
+
+      renderChapter();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    begin.addEventListener("click", () => {
+      if (started) return;
+      started = true;
+
+      opening.classList.add("fade-out");
+
+      // Three quiet seconds before the story appears.
+      window.setTimeout(() => {
+        opening.style.display = "none";
+        experience.classList.add("visible");
+        renderChapter();
+      }, 3000);
+    });
+
+    document.getElementById("back").addEventListener("click", () => move(-1));
+    document.getElementById("next").addEventListener("click", () => move(1));
+
+    renderChapter();
+  </script>
+
+</body>
+</html>
